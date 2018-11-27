@@ -3,10 +3,11 @@
 import urllib
 import urllib2
 import zlib  #for gzip decompression
-import os
+import os,sys
 import time, datetime
 import json
 import demjson
+# import chardet
 
 def  formulateUrl(productName, productModel, id=3975, webflag=2):
 	baseUrl = 'http://price.oilchem.net/imPrice/getPrice.lz?'
@@ -98,10 +99,9 @@ if __name__ == "__main__":
 
 	for i in range(1,maxPage):
 		if (i == 1):
-			csvHead = u'ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,备注'
-			print(csvHead)
+			csvHead = u'ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,备注\n'
+			# print(csvHead)
 			outputFile.write(csvHead.encode('utf-8'))
-			#outputFile.write('ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,备注')  #write the header of csv
 			continue  #skip the first page because it has been already fetched
 		else:
 			jsonData = getDataPage(reqUrl, headers, pageSize, i)
@@ -109,9 +109,10 @@ if __name__ == "__main__":
 			priceItem = jsonData['rows'][j]
 			id = priceItem['id']
 			cell = priceItem['cell']
-			line = id + ',' + ','.join(cell)
-			line.decode('gb2312')
-			print(line)
+			line = id + ',' + ','.join(cell) + '\n'
+			# line = line.decode('ascii')
+			line = line.encode('utf-8')
+			# print(line)
 			outputFile.write(line)
 		if (i==2):
 			break
