@@ -2,6 +2,9 @@
 
 import urllib
 import urllib2
+import zlib  #for gzip decompression
+import os
+import time
 
 def  formulateUrl(productName, productModel, id=3975, webflag=2):
 	baseUrl = 'http://price.oilchem.net/imPrice/getPrice.lz?'
@@ -37,9 +40,84 @@ def setCookieInHeader(cookie):
 	    'cookie' : cookie
 	}
 
-	return headers;
+	return headers
+
+def postParameter(page, pageSize=40):
+	postdata = {
+		'page' : page,
+		'rp' : pageSize,
+		'sortname' : 'id',
+		'sortorder' : 'asc',
+		'query' : None,
+		'qtype' : None
+	}
+	return urllib.urlencode(postdata)
+
+def getDataPage(reqUrl, headers, pageSize, pageIdx):
+	if (pageIdx < 1 or pageIdx > pageSize):
+		raise "Incorrect page number " + str(pageIdx)
+
+	data = postParameter(pageIdx, pageSize)
+
+	req = urllib2.Request(reqUrl, headers=headers, data=data)
+	#customization opener to add cookies
+	#opener = urllib2.build_opener()
+	response = urllib2.urlopen(req)
+	retdata = response.read()    #返回的数据是经过压缩的
+	#用gzip解压缩
+	jsonData = zlib.decompress(retdata, 16+zlib.MAX_WBITS)
+
+	return jsonData
 
 if __name__ == "__main__":
-	print('-------------------------')
+	print('-------------- Start crawling -----------------------')
+	startTime = time.time()
+	pageSize = 200 #define the page size
 
 	reqUrl = formulateUrl('LLDPE', '丁烯基', 3975, 2)
+
+	cookieConfigFile = open('cookie_config.dat', 'r')
+	cookieContent = cookieConfigFile.read()
+	headers = setCookieInHeader(cookieContent)
+	#print(cookieContent);
+	cookieConfigFile.close()
+
+	jsonData = getDataPage(reqUrl, headers, pageSize, 1)  # get the first page of data
+	
+	# print(jsonData)  
+
+	#get the total number of items
+	nstart = jsonData.index('total:')
+	totalStr = jsonData[nstart + 6 : nstart+20]
+	
+	nend = totalStr.index(',')
+	totalStr = totalStr[0:nend].strip()
+	totalItemCount = int(totalStr)
+	maxPage = (totalItemCount + pageSize - 1) / pageSize  #整数除法向上取整
+
+	print('====> Total item count: ' + str(totalItemCount) + ', number of pages: ' + str(maxPage))
+	print('')
+
+	tmpfilename = 'tmp.js'
+	outfile = open(tmpfilename, 'w+')
+	outfile.write('exports.data = ')
+	outfile.write(jsonData)
+	outfile.close()
+
+	os.system('node process.js')
+
+	for i in range(2, maxPage):
+		jsonData = getDataPage(reqUrl, headers, pageSize, i)
+		tmpfilename = 'tmp.js'
+		outfile = open(tmpfilename, 'w+')
+		outfile.write('exports.data = ')
+		outfile.write(jsonData)
+		outfile.close()
+
+		os.system('node process.js')
+
+	time.sleep(2)  # wait util the node process.js command to finish.
+	endTime = time.time()
+	print('Compelete the job in ' + str(endTime - startTime) + ' seconds')
+	print('------------ End -------------')
+	
