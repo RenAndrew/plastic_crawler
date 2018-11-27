@@ -4,7 +4,9 @@ import urllib
 import urllib2
 import zlib  #for gzip decompression
 import os
-import time
+import time, datetime
+import json
+import demjson
 
 def  formulateUrl(productName, productModel, id=3975, webflag=2):
 	baseUrl = 'http://price.oilchem.net/imPrice/getPrice.lz?'
@@ -67,7 +69,7 @@ def getDataPage(reqUrl, headers, pageSize, pageIdx):
 	#用gzip解压缩
 	jsonData = zlib.decompress(retdata, 16+zlib.MAX_WBITS)
 
-	return jsonData
+	return demjson.decode(jsonData) #the data is in raw javascript format, not json, convert it to json (python object).
 
 if __name__ == "__main__":
 	print('-------------- Start crawling -----------------------')
@@ -83,41 +85,71 @@ if __name__ == "__main__":
 	cookieConfigFile.close()
 
 	jsonData = getDataPage(reqUrl, headers, pageSize, 1)  # get the first page of data
-	
-	# print(jsonData)  
 
-	#get the total number of items
-	nstart = jsonData.index('total:')
-	totalStr = jsonData[nstart + 6 : nstart+20]
-	
-	nend = totalStr.index(',')
-	totalStr = totalStr[0:nend].strip()
-	totalItemCount = int(totalStr)
+	totalItemCount = jsonData['total']
 	maxPage = (totalItemCount + pageSize - 1) / pageSize  #整数除法向上取整
-
 	print('====> Total item count: ' + str(totalItemCount) + ', number of pages: ' + str(maxPage))
 	print('')
 
-	tmpfilename = 'tmp.js'
-	outfile = open(tmpfilename, 'w+')
-	outfile.write('exports.data = ')
-	outfile.write(jsonData)
-	outfile.close()
+	timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+	outputFileName= 'plas_out_' + timestamp + '.csv'
+	print(outputFileName)
+	outputFile = open(outputFileName, 'w+')
 
-	os.system('node process.js')
+	for i in range(1,maxPage):
+		if (i == 1):
+			csvHead = u'ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,备注'
+			print(csvHead)
+			outputFile.write(csvHead.encode('utf-8'))
+			#outputFile.write('ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,备注')  #write the header of csv
+			continue  #skip the first page because it has been already fetched
+		else:
+			jsonData = getDataPage(reqUrl, headers, pageSize, i)
+		for j in range(0, len(jsonData['rows']) ):
+			priceItem = jsonData['rows'][j]
+			id = priceItem['id']
+			cell = priceItem['cell']
+			line = id + ',' + ','.join(cell)
+			line.decode('gb2312')
+			print(line)
+			outputFile.write(line)
+		if (i==2):
+			break
 
-	for i in range(2, maxPage):
-		jsonData = getDataPage(reqUrl, headers, pageSize, i)
-		tmpfilename = 'tmp.js'
-		outfile = open(tmpfilename, 'w+')
-		outfile.write('exports.data = ')
-		outfile.write(jsonData)
-		outfile.close()
+	outputFile.close()
 
-		os.system('node process.js')
-
-	time.sleep(2)  # wait util the node process.js command to finish.
 	endTime = time.time()
-	print('Compelete the job in ' + str(endTime - startTime) + ' seconds')
+	print('Compelete the job in ' + str(endTime - startTime) + ' seconds.')
 	print('------------ End -------------')
+
+	# #get the total number of items
+	# nstart = jsonData.index('total:')
+	# totalStr = jsonData[nstart + 6 : nstart+20]
+	
+	# nend = totalStr.index(',')
+	# totalStr = totalStr[0:nend].strip()
+	# totalItemCount = int(totalStr)
+	# maxPage = (totalItemCount + pageSize - 1) / pageSize  #整数除法向上取整
+
+	# print('====> Total item count: ' + str(totalItemCount) + ', number of pages: ' + str(maxPage))
+	# print('')
+
+	# tmpfilename = 'tmp.js'
+	# outfile = open(tmpfilename, 'w+')
+	# outfile.write('exports.data = ')
+	# outfile.write(jsonData)
+	# outfile.close()
+
+	# os.system('node process.js')
+
+	# for i in range(2, maxPage):
+	# 	jsonData = getDataPage(reqUrl, headers, pageSize, i)
+	# 	tmpfilename = 'tmp.js'
+	# 	outfile = open(tmpfilename, 'w+')
+	# 	outfile.write('exports.data = ')
+	# 	outfile.write(jsonData)
+	# 	outfile.close()
+
+	# 	os.system('node process.js')
+	
 	
