@@ -114,8 +114,6 @@ if __name__ == "__main__":
 			line = line.encode('utf-8')
 			# print(line)
 			outputFile.write(line)
-		if (i==2):
-			break
 
 	outputFile.close()
 
