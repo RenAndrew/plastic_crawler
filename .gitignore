@@ -1,3 +1,7 @@
 *.json
 tmp.js
 *.csv
+*.jpg
+*.png
+*.html
+*.dat

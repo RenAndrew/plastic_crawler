@@ -72,6 +72,11 @@ def getDataPage(reqUrl, headers, pageSize, pageIdx):
 
 	return demjson.decode(jsonData) #the data is in raw javascript format, not json, convert it to json (python object).
 
+def main():
+	print('-'*30)
+	print('====    Mocked Spider    ====')
+	print('-'*30)
+
 if __name__ == "__main__":
 	print('-------------- Start crawling -----------------------')
 	startTime = time.time()
