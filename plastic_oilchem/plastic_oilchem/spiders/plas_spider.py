@@ -8,11 +8,12 @@ import time, datetime
 import json
 import demjson
 # import chardet
+from .. import plas_crawler
 
 from .. import SpiderBase
 
 class  PlasOilchemSpider(SpiderBase):
-	"""docstring for  PlasOilchemSpider"""
+	"""爬取隆众价格网上塑料数据，直接调用数据API获取数据，Selenium登陆后自动填入cookie信息"""
 
 
 	name = 'plas_spider'
@@ -21,7 +22,8 @@ class  PlasOilchemSpider(SpiderBase):
     ]
 
 	def parse(self, response):
+		plas_crawler.main()
 		print('-'*30)
-		print (response.url)
+		# print (response.url)
     	
 		
