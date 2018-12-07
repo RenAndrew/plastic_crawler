@@ -43,7 +43,8 @@ class  PlasOilchemSpider(SpiderBase):
 		#login from the webpage and get the cookie
 		self.autologin()
 
-		# plas_crawler.main()
+		#call the real crawler
+		plas_crawler.main()
 		print('-'*30)
 		# print (response.url)
     	
@@ -69,12 +70,11 @@ class  PlasOilchemSpider(SpiderBase):
 		root = Tk()
 		center_window(root, 2, 2)
 		root.wm_attributes('-topmost', 1)
+		root.withdraw()  #hide the window
 
 		while not isUserTypedCode:
 			time.sleep(6)
 			isUserTypedCode = mb.askokcancel('暂停', '验证码输入完毕？')
-
-		root.withdraw()  #hide the window
 
 		submitBtn = browser.find_element_by_id('login')
 		submitBtn.click() 
@@ -85,15 +85,15 @@ class  PlasOilchemSpider(SpiderBase):
 
 		time.sleep(2)
 
-		cookie = {}
-		cookie_str = ''
+		# cookie = {}
+		# cookie_str = ''
 		cookie_items = browser.get_cookies()
-		for cookie_item in cookie_items:
-		    cookie[cookie_item['name']] = cookie_item['value']
-		    cookie_str += (cookie_item['name'] + '=' + cookie_item['value'] + '; ')
+		# for cookie_item in cookie_items:
+		#     cookie[cookie_item['name']] = cookie_item['value']
+		#     cookie_str += (cookie_item['name'] + '=' + cookie_item['value'] + '; ')
 
-		print('----------------------')
-		print(cookie_str)
+		# print('----------------------')
+		# print(cookie_str)
 		# tmpfile = open('./work_dir/tmp.dat', 'w+')
 		# tmpfile.write(cookie_str)
 
@@ -101,10 +101,10 @@ class  PlasOilchemSpider(SpiderBase):
 
 		browser.close()
 
-		time.sleep(3)
+		# time.sleep(3)
 
 	def writeCookieConfig(self,cookie_items):
-		outfile = open('./work_dir/cookie_config.dat', 'w+')
+		outfile = open('./work_dir/tmp.dat', 'w+')
 		cookie_str = '';
 
 		cookie_dict = {}
