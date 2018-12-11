@@ -74,6 +74,7 @@ def getDataPage(reqUrl, headers, pageSize, pageIdx):
 
 def main():
 	print('-------------- Start crawling -----------------------')
+	os.system('pwd')
 	startTime = time.time()
 	pageSize = 200 #define the page size
 

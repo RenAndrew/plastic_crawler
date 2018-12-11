@@ -37,16 +37,15 @@ class  PlasOilchemSpider(SpiderBase):
 	start_urls = [
         'http://news.oilchem.net/login.shtml',
     ]
-
     
 	def parse(self, response):
 		#login from the webpage and get the cookie
 		self.autologin()
 
 		#call the real crawler
-		plas_crawler.main()
+		# plas_crawler.main()
 		print('-'*30)
-		# print (response.url)
+		
     	
 	def autologin(self):
 		browser = webdriver.Chrome()
@@ -63,31 +62,47 @@ class  PlasOilchemSpider(SpiderBase):
 		passwrdInput.click()
 		passwrdInput.send_keys(self.userPassword)
 
-		verificationCode = browser.find_element_by_id('code')
-		verificationCode.click()
+		verificationCodeImg = browser.find_element_by_id('rCode')
+		srcLink = verificationCodeImg.get_attribute('src')
+		print('-'*20)
+		print(srcLink)
+		print('-'*20)
 
-		isUserTypedCode = False
-		root = Tk()
-		center_window(root, 2, 2)
-		root.wm_attributes('-topmost', 1)
-		root.withdraw()  #hide the window
+		if (srcLink is not None):
+			req = urllib2.Request(srcLink)
+			response = urllib2.urlopen(req)
+			imgData = response.read()
+			
+			codeImgFile = open('./code.jpg', 'wb')
+			codeImgFile.write(imgData)  
+			codeImgFile.close()
 
-		while not isUserTypedCode:
-			time.sleep(6)
-			isUserTypedCode = mb.askokcancel('暂停', '验证码输入完毕？')
+		else:
+			raise 'Can not get the verification code image!'
+		# verificationCode.click()
 
-		submitBtn = browser.find_element_by_id('login')
-		submitBtn.click() 
+		# isUserTypedCode = False
+		# root = Tk()
+		# center_window(root, 2, 2)
+		# root.wm_attributes('-topmost', 1)
+		# root.withdraw()  #hide the window
 
-		time.sleep(2)	#wait until login finished
+		# while not isUserTypedCode:
+		# 	time.sleep(6)
+		# 	isUserTypedCode = mb.askokcancel('暂停', '验证码输入完毕？')
 
-		browser.get('http://price.oilchem.net/imPrice/listPrice.lz?id=3975&webFlag=2&hndz=1')
+		# submitBtn = browser.find_element_by_id('login')
+		# submitBtn.click() 
 
-		time.sleep(2)
+		# time.sleep(2)	#wait until login finished
+
+		# browser.get('http://price.oilchem.net/imPrice/listPrice.lz?id=3975&webFlag=2&hndz=1')
+
+		# time.sleep(2)
 
 		# cookie = {}
 		# cookie_str = ''
-		cookie_items = browser.get_cookies()
+		# cookie_items = browser.get_cookies()
 		# for cookie_item in cookie_items:
 		#     cookie[cookie_item['name']] = cookie_item['value']
 		#     cookie_str += (cookie_item['name'] + '=' + cookie_item['value'] + '; ')
@@ -97,13 +112,15 @@ class  PlasOilchemSpider(SpiderBase):
 		# tmpfile = open('./work_dir/tmp.dat', 'w+')
 		# tmpfile.write(cookie_str)
 
-		self.writeCookieConfig(cookie_items)
+		# self.writeCookieConfig(cookie_items)
 
 		browser.close()
 
 		# time.sleep(3)
 
 	def writeCookieConfig(self,cookie_items):
+		print('Current work directory:')
+		os.system('pwd')
 		outfile = open('./work_dir/tmp.dat', 'w+')
 		cookie_str = '';
 
@@ -164,3 +181,5 @@ class  PlasOilchemSpider(SpiderBase):
 		outfile.write(cookie_str)
 		outfile.close()
 
+	def getWorkdingDir(self):
+		
