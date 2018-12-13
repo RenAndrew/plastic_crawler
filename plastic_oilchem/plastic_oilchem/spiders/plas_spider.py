@@ -7,12 +7,15 @@ import os,sys
 import time, datetime
 import json
 import demjson
+import random
 # import chardet
 
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains  #鼠标操作
+from selenium.webdriver.common.keys import Keys
 
 from .. import plas_crawler
+from .. import decode
 
 from .. import SpiderBase
 
@@ -52,7 +55,7 @@ class  PlasOilchemSpider(SpiderBase):
 		browser.implicitly_wait(5)  # wait until the page is fully loaded.
 
 		browser.get('http://news.oilchem.net/login.shtml')
-		print(browser.title)
+		# time.sleep(10)
 
 		userNameInput = browser.find_element_by_id('etuser_userLoginname')	
 		userNameInput.click()
@@ -62,61 +65,59 @@ class  PlasOilchemSpider(SpiderBase):
 		passwrdInput.click()
 		passwrdInput.send_keys(self.userPassword)
 
-		verificationCodeImg = browser.find_element_by_id('rCode')
-		srcLink = verificationCodeImg.get_attribute('src')
-		print('-'*20)
+		# time.sleep(5)
+		# verificationCodeImg = browser.find_element_by_id('rCode')
+		# srcLink = verificationCodeImg.get_attribute('src')
+		srcLink = 'http://news.oilchem.net/getcode/api/?' + str(random.random()) + str(random.random())[2:6]
+		
 		print(srcLink)
-		print('-'*20)
+
+		cookie_items = browser.get_cookies()
+
+		# print(cookie_items)
+
+		workDir = self.getWorkingDir()
+		timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+		codeImgFilePath = workDir + '/code_' + timestamp + '.jpg'
 
 		if (srcLink is not None):
 			req = urllib2.Request(srcLink)
+			#when getting verification code image, must add cookie to the request,
+			#or the server will not bond the verification code with your session.
+			#and the verification will failed.
+			req.add_header('cookie', self.cookieToStr(cookie_items)) 
 			response = urllib2.urlopen(req)
 			imgData = response.read()
 			
-			codeImgFile = open('./code.jpg', 'wb')
+			codeImgFile = open(codeImgFilePath, 'wb')
 			codeImgFile.write(imgData)  
 			codeImgFile.close()
 
 		else:
-			raise 'Can not get the verification code image!'
-		# verificationCode.click()
+			raise Exception('Can not get the verification code image!')
 
-		# isUserTypedCode = False
-		# root = Tk()
-		# center_window(root, 2, 2)
-		# root.wm_attributes('-topmost', 1)
-		# root.withdraw()  #hide the window
+		codeValue = decode.decodePicuture(codeImgFilePath)
+		print(codeValue)
 
-		# while not isUserTypedCode:
-		# 	time.sleep(6)
-		# 	isUserTypedCode = mb.askokcancel('暂停', '验证码输入完毕？')
+		verificationCode = browser.find_element_by_id('code')
+		verificationCode.click()
+		verificationCode.send_keys(codeValue)
 
-		# submitBtn = browser.find_element_by_id('login')
-		# submitBtn.click() 
+		time.sleep(5)
 
-		# time.sleep(2)	#wait until login finished
-
-		# browser.get('http://price.oilchem.net/imPrice/listPrice.lz?id=3975&webFlag=2&hndz=1')
-
-		# time.sleep(2)
-
-		# cookie = {}
-		# cookie_str = ''
-		# cookie_items = browser.get_cookies()
-		# for cookie_item in cookie_items:
-		#     cookie[cookie_item['name']] = cookie_item['value']
-		#     cookie_str += (cookie_item['name'] + '=' + cookie_item['value'] + '; ')
-
-		# print('----------------------')
-		# print(cookie_str)
-		# tmpfile = open('./work_dir/tmp.dat', 'w+')
-		# tmpfile.write(cookie_str)
-
-		# self.writeCookieConfig(cookie_items)
+		submitBtn = browser.find_element_by_id('login')
+		submitBtn.click()
 
 		browser.close()
 
 		# time.sleep(3)
+
+	def cookieToStr(self, cookie_items):
+		cookie_str = ''
+		for cookie_item in cookie_items:
+			cookie_str += ( cookie_item['name'] + '=' + cookie_item['value'] + ';' )
+
+		return cookie_str;
 
 	def writeCookieConfig(self,cookie_items):
 		print('Current work directory:')
@@ -181,5 +182,9 @@ class  PlasOilchemSpider(SpiderBase):
 		outfile.write(cookie_str)
 		outfile.close()
 
-	def getWorkdingDir(self):
-		
+	def getWorkingDir(self):
+		if os.path.exists('./work_dir'):
+			return os.getcwd() + '/work_dir'
+		else:
+			os.mkdir('work_dir')
+			return os.getcwd() + '/work_dir'

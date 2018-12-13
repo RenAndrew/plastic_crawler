@@ -8,7 +8,8 @@
 # http://www.pythonware.com/products/works/articles/regpy20.htm  
 #  
 # modified by Valentine Gogichashvili as described in http://www.mail-archive.com/distutils-sig@python.org/msg10512.html  
-   
+
+#in windows, sometimes selenium will not recoginze python2.7, need to register it.
 import sys  
    
 from _winreg import *  

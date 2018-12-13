@@ -59,11 +59,9 @@ def decodePicuture(picpath):
 	im = Image.open(picpath)
 	reenforcedIm = pictureTransform(im)
 
-	im.show()
-
 	codeText = tesserocr.image_to_text(reenforcedIm)
 
-	print(codeText)
+	# print(codeText)
 
 	try:
 		retNumber = calculate(codeText)
