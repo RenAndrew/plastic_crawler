@@ -33,8 +33,8 @@ def center_window(root, w = 300, h = 200):
 class  PlasOilchemSpider(SpiderBase):
 	"""爬取隆众价格网上塑料数据，直接调用数据API获取数据，Selenium登陆后自动填入cookie信息"""
 
-	userPassword = 'Cbnb12345'
-	userName = '18815275529'
+	userPassword = 'ax1010zq'
+	userName = 'axzq1010'
 
 	name = 'plas_spider'
 	start_urls = [
@@ -43,10 +43,24 @@ class  PlasOilchemSpider(SpiderBase):
     
 	def parse(self, response):
 		#login from the webpage and get the cookie
-		self.autologin()
+		loginOK = False
+		loginCount = 0
+		while loginOK is not True:
+			try:
+				configFilePath = self.autologin()
+				break
+			except (Exception), x:  #Any exception reload the autologin until max trial number
+				print('login failed!')
+				loginCount += 1
+				if (loginCount > 3):
+					print('==========>Error!, login failed for 5 times, please check the network!')
+					print('Exiting...')
+					raise Exception('Can not login!')
+				print(x)
+		# self.autologin()
 
 		#call the real crawler
-		# plas_crawler.main()
+		plas_crawler.main(configFilePath)
 		print('-'*30)
 		
     	
@@ -55,7 +69,6 @@ class  PlasOilchemSpider(SpiderBase):
 		browser.implicitly_wait(5)  # wait until the page is fully loaded.
 
 		browser.get('http://news.oilchem.net/login.shtml')
-		# time.sleep(10)
 
 		userNameInput = browser.find_element_by_id('etuser_userLoginname')	
 		userNameInput.click()
@@ -75,7 +88,6 @@ class  PlasOilchemSpider(SpiderBase):
 		cookie_items = browser.get_cookies()
 
 		# print(cookie_items)
-
 		workDir = self.getWorkingDir()
 		timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
 		codeImgFilePath = workDir + '/code_' + timestamp + '.jpg'
@@ -97,20 +109,46 @@ class  PlasOilchemSpider(SpiderBase):
 			raise Exception('Can not get the verification code image!')
 
 		codeValue = decode.decodePicuture(codeImgFilePath)
-		print(codeValue)
+		print('Code value: %d' %(codeValue))
+		if (codeValue < 0 or codeValue > 9999):
+			browser.close()
+			raise Exception('Can not parse the verification code, please retry!')
 
 		verificationCode = browser.find_element_by_id('code')
 		verificationCode.click()
 		verificationCode.send_keys(codeValue)
 
-		time.sleep(5)
+		time.sleep(1)
 
 		submitBtn = browser.find_element_by_id('login')
 		submitBtn.click()
+		time.sleep(3)
+
+		#get the data page for updating cookie
+		browser.get('http://price.oilchem.net/imPrice/listPrice.lz?id=3975&webFlag=2&hndz=1')
+		time.sleep(30)
+		cookie_items = browser.get_cookies()
+
+		#test if really login by checking cookie
+		if (not self.testLoginOK(cookie_items)):
+			browser.close()
+			raise Exception('Can not login successfully!')
+
+		# print(cookie_items)
+		# configFilePath = self.writeCookieConfig(cookie_items)
+		configFilePath = self.getWorkingDir() + '/cookie_config.dat'
+		with open(configFilePath, 'w+') as outfile:
+			outfile.write(self.cookieToStr(cookie_items))
 
 		browser.close()
 
-		# time.sleep(3)
+		return configFilePath
+
+	def testLoginOK(self, cookie_items):
+		for cookie_item in cookie_items:
+			if cookie_item['name'] == 'userid':
+				return True
+		return False
 
 	def cookieToStr(self, cookie_items):
 		cookie_str = ''
@@ -120,9 +158,10 @@ class  PlasOilchemSpider(SpiderBase):
 		return cookie_str;
 
 	def writeCookieConfig(self,cookie_items):
-		print('Current work directory:')
-		os.system('pwd')
-		outfile = open('./work_dir/tmp.dat', 'w+')
+		# print('Current work directory:')
+		# os.system('pwd')
+		configFilePath = self.getWorkingDir() + '/_cookie_config.dat'
+		outfile = open(configFilePath, 'w+')
 		cookie_str = '';
 
 		cookie_dict = {}
@@ -181,6 +220,7 @@ class  PlasOilchemSpider(SpiderBase):
 
 		outfile.write(cookie_str)
 		outfile.close()
+		return configFilePath
 
 	def getWorkingDir(self):
 		if os.path.exists('./work_dir'):

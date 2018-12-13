@@ -72,15 +72,15 @@ def getDataPage(reqUrl, headers, pageSize, pageIdx):
 
 	return demjson.decode(jsonData) #the data is in raw javascript format, not json, convert it to json (python object).
 
-def main():
+def main(configFilePath):
 	print('-------------- Start crawling -----------------------')
-	os.system('pwd')
+	# os.system('pwd')
 	startTime = time.time()
 	pageSize = 200 #define the page size
 
 	reqUrl = formulateUrl('LLDPE', '丁烯基', 3975, 2)
 
-	cookieConfigFile = open('./work_dir/cookie_config.dat', 'r')
+	cookieConfigFile = open(configFilePath, 'r')
 	cookieContent = cookieConfigFile.read()
 	headers = setCookieInHeader(cookieContent)
 	#print(cookieContent);
@@ -124,7 +124,7 @@ def main():
 	return 0
 
 if __name__ == "__main__":
-	main()
+	main('./work_dir/cookie_config.dat')
 
 	# #get the total number of items
 	# nstart = jsonData.index('total:')

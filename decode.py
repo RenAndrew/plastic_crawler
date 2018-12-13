@@ -59,7 +59,7 @@ def decodePicuture(picpath):
 	im = Image.open(picpath)
 	reenforcedIm = pictureTransform(im)
 
-	im.show()
+	# im.show()
 
 	codeText = tesserocr.image_to_text(reenforcedIm)
 
