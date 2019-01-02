@@ -10,6 +10,8 @@ import demjson
 import random
 # import chardet
 
+from scrapy import FormRequest
+
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains  #鼠标操作
 from selenium.webdriver.common.keys import Keys
@@ -19,8 +21,8 @@ from .. import decode
 
 from .. import SpiderBase
 
-from Tkinter import *
-import tkMessageBox as mb
+# from Tkinter import *
+# import tkMessageBox as mb
 
 #center the root frame window
 def center_window(root, w = 300, h = 200):
@@ -38,10 +40,33 @@ class  PlasOilchemSpider(SpiderBase):
 
 	name = 'plas_spider'
 	start_urls = [
-        'http://news.oilchem.net/login.shtml',
-    ]
-    
-	def parse(self, response):
+		'http://news.oilchem.net/login.shtml'
+	]
+	
+	def parse_by_formsubmit(self, response):
+		print(response.url)
+		print('----------Try to login-------------')
+		inputSelector = response.xpath('//*[@id="LoginForm"]//center//input')
+
+		formData = dict()
+		for sel in inputSelector:
+			name = sel.css('input::attr(name)').extract_first()
+			value = sel.css('input::attr(value)').extract_first()
+			print('name: %s, value: %s' % (name, value))
+
+		formData['username'] = ''
+		formData['passowrd'] = ''
+		formData['code'] = '1024'
+		submitUrl = "/user/userLogin.do?ajax=1&chkbdwx="+ chkbdwx +"&closewindow=&rnd=" + String(Math.random()) + ((band)?"&b="+band:"")
+		request = FormRequest(submitUrl, formdata=formData)
+
+	def parse(self, response ):
+
+		self.parse_by_formsubmit(response)
+		#self.parse_by_selenium(response)
+
+    #login by selenium automation
+	def parse_by_selenium(self, response):
 		#login from the webpage and get the cookie
 		loginOK = False
 		loginCount = 0
