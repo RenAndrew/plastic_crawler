@@ -16,8 +16,8 @@ def  formulateUrl(productName, productModel, id=3975, webflag=2):
 		'id' : id,
 		'priceDate' : '',
 		'priceDate1' : '',
-		'pName' : productName,
-		'productModel' : productModel,
+		'pName1' : productName,
+		'productModel1' : productModel,
 		'pArea1' : '',
 		'pType1' : '',
 		'keyword' : '',
@@ -106,6 +106,53 @@ def main(configFilePath):
 			continue  #skip the first page because it has been already fetched
 		else:
 			jsonData = getDataPage(reqUrl, headers, pageSize, i)
+		for j in range(0, len(jsonData['rows']) ):
+			priceItem = jsonData['rows'][j]
+			id = priceItem['id']
+			cell = priceItem['cell']
+			line = id + ',' + ','.join(cell) + '\n'
+			# line = line.decode('ascii')
+			line = line.encode('utf-8')
+			# print(line)
+			outputFile.write(line)
+
+	outputFile.close()
+
+	endTime = time.time()
+	print('Compelete the job in ' + str(endTime - startTime) + ' seconds.')
+	print('------------ End -------------')
+	return 0
+
+#same as main, but get the cookie from parameter
+def downloadData(cookieValue):
+	print('-------------- Start crawling -----------------------')
+	# os.system('pwd')
+	startTime = time.time()
+	pageSize = 200 #define the page size
+
+	reqUrl = formulateUrl('LLDPE', '丁烯基', 3975, 2)
+
+	headers = setCookieInHeader(cookieValue)
+
+	jsonData = getDataPage(reqUrl, headers, pageSize, 1)  # get the first page of data
+
+	totalItemCount = jsonData['total']
+	maxPage = (totalItemCount + pageSize - 1) / pageSize  #整数除法向上取整
+	print('====> Total item count: ' + str(totalItemCount) + ', number of pages: ' + str(maxPage))
+	print('')
+
+	timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+	outputFileName= 'plas_out_' + timestamp + '.csv'
+	print(outputFileName)
+	outputFile = open(outputFileName, 'w+')
+
+	for i in range(1,maxPage):
+		if (i == 1):
+			csvHead = u'ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,备注\n'
+			# print(csvHead)
+			outputFile.write(csvHead.encode('utf-8'))
+			
+		jsonData = getDataPage(reqUrl, headers, pageSize, i)
 		for j in range(0, len(jsonData['rows']) ):
 			priceItem = jsonData['rows'][j]
 			id = priceItem['id']
