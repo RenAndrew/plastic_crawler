@@ -26,6 +26,7 @@ from . import decode
 # 	y = (hs/2) - (h/2)
 # 	root.geometry("%dx%d+%d+%d" % (w, h, x, y))
 
+# did not work yesterday (2019-01-07), dont know why.
 class AutoLogin:
 	"""隆众网自动登录"""
 
@@ -104,7 +105,7 @@ class AutoLogin:
 
 	#用模拟表单提交的方式登录
 	def formlogin(self, response):
-		submitUrl = "http://news.oilchem.net/user/userLogin.do?ajax=1&chkbdwx=0&closewindow=&rnd=" + str(random.random()) + str(random.random())[2:6]
+		submitUrl = "http://news.oilchem.net/user/userLogin.do?ajax=1&chkbdwx=0&closewindow=&rnd=" + str(random.random()) + str(random.random())[2:6] + '&b=c6cd86f957430ab076158365dac8a2d4'
 		cookie = response.headers['Set-Cookie']
 		# print(cookie)
 
@@ -188,7 +189,8 @@ class AutoLogin:
 class SeleniumLogin(AutoLogin):
 
 	def selelogin(self, response):
-		browser = webdriver.Chrome()
+		# browser = webdriver.Chrome()
+		browser = webdriver.PhantomJS()
 		browser.implicitly_wait(5)  # wait until the page is fully loaded.
 
 		countTriedMax = 3
@@ -249,86 +251,6 @@ class SeleniumLogin(AutoLogin):
 		browser.close()
 		print('Login failed more than 3 times, sorry we have to quit program.')
 		raise Exception('Program quit exception.')
-
-	# def autologin(self):
-	# 	browser = webdriver.Chrome()
-	# 	browser.implicitly_wait(5)  # wait until the page is fully loaded.
-
-	# 	browser.get(response.url)
-
-	# 	userNameInput = browser.find_element_by_id('etuser_userLoginname')	
-	# 	userNameInput.click()
-	# 	userNameInput.send_keys(self.userName)
-
-	# 	passwrdInput = browser.find_element_by_id('etuser_userPassword')
-	# 	passwrdInput.click()
-	# 	passwrdInput.send_keys(self.userPassword)
-
-	# 	# time.sleep(5)
-	# 	# verificationCodeImg = browser.find_element_by_id('rCode')
-	# 	# srcLink = verificationCodeImg.get_attribute('src')
-	# 	srcLink = 'http://news.oilchem.net/getcode/api/?' + str(random.random()) + str(random.random())[2:6]   #18 digits random number
-		
-	# 	print(srcLink)
-
-	# 	cookie_items = browser.get_cookies()
-
-	# 	# print(cookie_items)
-	# 	workDir = self.getWorkingDir()
-	# 	timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-	# 	codeImgFilePath = workDir + '/code_' + timestamp + '.jpg'
-
-	# 	if (srcLink is not None):
-	# 		req = urllib2.Request(srcLink)
-	# 		#when getting verification code image, must add cookie to the request,
-	# 		#or the server will not bond the verification code with your session.
-	# 		#and the verification will failed.
-	# 		req.add_header('cookie', self.cookieToStr(cookie_items)) 
-	# 		response = urllib2.urlopen(req)
-	# 		imgData = response.read()
-			
-	# 		codeImgFile = open(codeImgFilePath, 'wb')
-	# 		codeImgFile.write(imgData)  
-	# 		codeImgFile.close()
-
-	# 	else:
-	# 		raise Exception('Can not get the verification code image!')
-
-	# 	codeValue = decode.decodePicuture(codeImgFilePath)
-	# 	print('Code value: %d' %(codeValue))
-	# 	if (codeValue < 0 or codeValue > 9999):
-	# 		browser.close()
-	# 		raise Exception('Can not parse the verification code, please retry!')
-
-	# 	verificationCode = browser.find_element_by_id('code')
-	# 	verificationCode.click()
-	# 	verificationCode.send_keys(codeValue)
-
-	# 	time.sleep(1)
-
-	# 	submitBtn = browser.find_element_by_id('login')
-	# 	submitBtn.click()
-	# 	time.sleep(3)
-
-	# 	#get the data page for updating cookie
-	# 	browser.get('http://price.oilchem.net/imPrice/listPrice.lz?id=3975&webFlag=2&hndz=1')
-	# 	time.sleep(30)
-	# 	cookie_items = browser.get_cookies()
-
-	# 	#test if really login by checking cookie
-	# 	if (not self.testLoginOK(cookie_items)):
-	# 		browser.close()
-	# 		raise Exception('Can not login successfully!')
-
-	# 	# print(cookie_items)
-	# 	# configFilePath = self.writeCookieConfig(cookie_items)
-	# 	configFilePath = self.getWorkingDir() + '/cookie_config.dat'
-	# 	with open(configFilePath, 'w+') as outfile:
-	# 		outfile.write(self.cookieToStr(cookie_items))
-
-	# 	browser.close()
-
-	# 	return configFilePath
 
 	def testLoginOK(self, cookie_items):
 		for cookie_item in cookie_items:

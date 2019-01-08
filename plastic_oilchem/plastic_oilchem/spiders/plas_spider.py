@@ -45,8 +45,8 @@ class  PlasOilchemSpider(SpiderBase):
 
 	def parse(self, response ):
 		print (response.url)
-		self.parse_by_formsubmit(response)
-		# self.parse_by_selenium(response)
+		# self.parse_by_formsubmit(response)
+		self.parse_by_selenium(response)
 
 	def parse_by_selenium(self, response):
 		print('----------Try to login-------------')
@@ -110,7 +110,7 @@ class  PlasOilchemSpider(SpiderBase):
 	# 	# time.sleep(5)
 	# 	# verificationCodeImg = browser.find_element_by_id('rCode')
 	# 	# srcLink = verificationCodeImg.get_attribute('src')
-	# 	srcLink = 'http://news.oilchem.net/getcode/api/?' + str(random.random()) + str(random.random())[2:6]   #18 digits random number
+		srcLink = 'http://news.oilchem.net/getcode/api/?' + str(random.random()) + str(random.random())[2:6]   #18 digits random number
 		
 	# 	print(srcLink)
 
