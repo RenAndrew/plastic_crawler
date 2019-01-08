@@ -58,18 +58,30 @@ class AutoLogin:
 		formData['username'] = self.accountName
 		formData['password'] = self.password
 		formData['code'] = str(codeValue)
+		formData['rp'] = ''
+
+		encodedFormData = urllib.urlencode(formData)
 
 		headers = {
 			'Accept':'application/json, text/plain, */*',
 			'User-Agent':'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.23 Mobile Safari/537.36',
 			'Origin': 'http://news.oilchem.net',
 			'Referer': 'http://news.oilchem.net/login.shtml',
+			'Content-Length': len(encodedFormData),
+			'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
 			'Accept-Encoding': 'gzip, deflate',
 			'Accept-Language': 'en,zh-CN;q=0.9,zh;q=0.8',
-			'cookie' : cookie
+			'cookie' : cookie,
+			'X-Requested-With': 'XMLHttpRequest'
 		}
 
-		req = urllib2.Request(submitUrl, headers=headers, data=urllib.urlencode(formData))
+		print('-'*50)
+		print(formData)
+		print(encodedFormData)
+		print(cookie)
+		print('-'*50)
+
+		req = urllib2.Request(submitUrl, headers=headers, data=encodedFormData)
 
 		response = urllib2.urlopen(req)
 		retdata = response.read()
@@ -96,7 +108,7 @@ class AutoLogin:
 		cookie = response.headers['Set-Cookie']
 		# print(cookie)
 
-		countTriedMax = 3
+		countTriedMax = 1
 		while (countTriedMax > 0):
 			countTriedMax = countTriedMax - 1
 			#Try to get and parse the verification code, try 5 times at most
@@ -150,7 +162,7 @@ class AutoLogin:
 	def refreshVerfCode(self, cookie):
 		codeApiUrl = 'http://news.oilchem.net/getcode/api/?' + str(random.random()) + str(random.random())[2:6]   #18 digits random number
 		
-		# print(codeApiUrl)
+		print(codeApiUrl)
 
 		workDir = self.getWorkingDir()
 		timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
@@ -187,14 +199,14 @@ class SeleniumLogin(AutoLogin):
 
 			userNameInput = browser.find_element_by_id('etuser_userLoginname')	
 			userNameInput.click()
-			userNameInput.send_keys(self.userName)
+			userNameInput.send_keys(self.accountName)
 
 			passwrdInput = browser.find_element_by_id('etuser_userPassword')
 			passwrdInput.click()
-			passwrdInput.send_keys(self.userPassword)
+			passwrdInput.send_keys(self.password)
 
 			cookie_items = browser.get_cookies()
-			cookie = self.cookieToStr(cookie_item)
+			cookie = self.cookieToStr(cookie_items)
 			#Try to get and parse the verification code, try 5 times at most
 			codeValue = self.tryDecodeTimes(cookie, 5)
 			if codeValue is None:
@@ -213,9 +225,11 @@ class SeleniumLogin(AutoLogin):
 				time.sleep(3)
 
 				#get the data page for updating cookie
-				browser.get('http://price.oilchem.net/imPrice/listPrice.lz?id=3975&webFlag=2&hndz=1')
-				time.sleep(3)
+				# browser.get('http://price.oilchem.net/imPrice/listPrice.lz?id=3975&webFlag=2&hndz=1')
+				# time.sleep(3)
 				cookie_items = browser.get_cookies()
+				loginedCookie = self.cookieToStr(cookie_items)
+				print (loginedCookie)
 
 				#test if really login by checking cookie
 				if (not self.testLoginOK(cookie_items)):
@@ -230,7 +244,7 @@ class SeleniumLogin(AutoLogin):
 				browser.close()
 				return loginedCookie
 			except:
-				pass #do nothing but try again
+				time.sleep(10) #do nothing but try again
 
 		browser.close()
 		print('Login failed more than 3 times, sorry we have to quit program.')
@@ -394,3 +408,12 @@ class SeleniumLogin(AutoLogin):
 		outfile.write(cookie_str)
 		outfile.close()
 		return configFilePath
+
+
+if __name__ == '__main__':
+	print ('Test login!')
+
+	loginMachine = oilchem_login.AutoLogin(self.getWorkingDir())
+
+	loginMachine.setAccount(self.userName, self.userPassword)
+	cookieAfterLogin = loginMachine.formlogin(response)

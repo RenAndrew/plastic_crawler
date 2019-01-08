@@ -17,7 +17,7 @@ from selenium.webdriver.common.keys import Keys
 from .. import plas_crawler
 from .. import decode
 from .. import oilchem_login
-# from .. import SpiderBase
+from .. import SpiderBase
 
 class  PlasOilchemSpider(SpiderBase):
 	"""爬取隆众价格网上塑料数据，直接调用数据API获取数据，自动登录并利用登录后的cookie获取权限"""
@@ -44,20 +44,21 @@ class  PlasOilchemSpider(SpiderBase):
 		plas_crawler.downloadData(cookieAfterLogin)
 
 	def parse(self, response ):
-
-		# self.parse_by_formsubmit(response)
-		self.parse_by_selenium(response)
+		print (response.url)
+		self.parse_by_formsubmit(response)
+		# self.parse_by_selenium(response)
 
 	def parse_by_selenium(self, response):
 		print('----------Try to login-------------')
 		loginMachine = oilchem_login.SeleniumLogin(self.getWorkingDir())
 
 		loginMachine.setAccount(self.userName, self.userPassword)
-		cookieAfterLogin = loginMachine.autologin(response)
+		cookieAfterLogin = loginMachine.selelogin(response)
 
+		print (cookieAfterLogin)
 		#real crawler start here
-		# print('Start crawl data!')
-		# plas_crawler.downloadData(cookieAfterLogin)
+		print('Start crawl data!')
+		plas_crawler.downloadData(cookieAfterLogin)
 
     #login by selenium automation
 	# def parse_by_selenium(self, response):
@@ -82,7 +83,7 @@ class  PlasOilchemSpider(SpiderBase):
 	# 	plas_crawler.main(configFilePath)
 	# 	print('-'*30)
 		
-    def getWorkingDir(self):
+	def getWorkingDir(self):
 		if os.path.exists('./work_dir'):
 			return os.getcwd() + '/work_dir'
 		else:
