@@ -1,8 +1,9 @@
 *.json
-tmp.js
+*.js
 *.csv
 *.jpg
 *.png
 *.html
 *.dat
 *.pyc
+*.log

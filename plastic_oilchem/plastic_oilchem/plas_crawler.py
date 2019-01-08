@@ -124,7 +124,7 @@ def main(configFilePath):
 	return 0
 
 #same as main, but get the cookie from parameter
-def downloadData(cookieValue):
+def downloadData(cookieValue, outputpath):
 	print('-------------- Start crawling -----------------------')
 	# os.system('pwd')
 	startTime = time.time()
@@ -142,7 +142,8 @@ def downloadData(cookieValue):
 	print('')
 
 	timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-	outputFileName= 'plas_out_' + timestamp + '.csv'
+	outputFileName = outputpath + '/plas_out_' + timestamp + '.csv'
+	print('==== output to:')
 	print(outputFileName)
 	outputFile = open(outputFileName, 'w+')
 

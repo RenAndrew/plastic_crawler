@@ -58,30 +58,7 @@ class  PlasOilchemSpider(SpiderBase):
 		print (cookieAfterLogin)
 		#real crawler start here
 		print('Start crawl data!')
-		plas_crawler.downloadData(cookieAfterLogin)
-
-    #login by selenium automation
-	# def parse_by_selenium(self, response):
-	# 	#login from the webpage and get the cookie
-	# 	loginOK = False
-	# 	loginCount = 0
-	# 	while loginOK is not True:
-	# 		try:
-	# 			configFilePath = self.autologin()
-	# 			break
-	# 		except (Exception), x:  #Any exception reload the autologin until max trial number
-	# 			print('login failed!')
-	# 			loginCount += 1
-	# 			if (loginCount > 3):
-	# 				print('==========>Error!, login failed for 5 times, please check the network!')
-	# 				print('Exiting...')
-	# 				raise Exception('Can not login!')
-	# 			print(x)
-	# 	# self.autologin()
-
-	# 	#call the real crawler
-	# 	plas_crawler.main(configFilePath)
-	# 	print('-'*30)
+		plas_crawler.downloadData(cookieAfterLogin, self.getOutputPath())
 		
 	def getWorkingDir(self):
 		if os.path.exists('./work_dir'):
@@ -89,6 +66,13 @@ class  PlasOilchemSpider(SpiderBase):
 		else:
 			os.mkdir('work_dir')
 			return os.getcwd() + '/work_dir'
+
+	def getOutputPath(self):
+		if os.path.exists('./output'):
+			return os.getcwd() + '/output'
+		else:
+			os.mkdir('output')
+			return os.getcwd() + '/output'
 
 	#######################################################################
 	# The following code it not used now, just work as a backup solution #
@@ -110,7 +94,7 @@ class  PlasOilchemSpider(SpiderBase):
 	# 	# time.sleep(5)
 	# 	# verificationCodeImg = browser.find_element_by_id('rCode')
 	# 	# srcLink = verificationCodeImg.get_attribute('src')
-		srcLink = 'http://news.oilchem.net/getcode/api/?' + str(random.random()) + str(random.random())[2:6]   #18 digits random number
+		# srcLink = 'http://news.oilchem.net/getcode/api/?' + str(random.random()) + str(random.random())[2:6]   #18 digits random number
 		
 	# 	print(srcLink)
 
