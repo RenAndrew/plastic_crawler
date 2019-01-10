@@ -61,7 +61,7 @@ class  PlasOilchemSpider(SpiderBase):
 		loginMachine.setAccount(self.userName, self.userPassword)
 		cookieAfterLogin = loginMachine.selelogin(response)
 
-		print (cookieAfterLogin)
+		# print (cookieAfterLogin)
 		return cookieAfterLogin
 		
 		
