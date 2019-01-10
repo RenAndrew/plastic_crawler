@@ -9,6 +9,19 @@ import json
 import demjson
 # import chardet
 
+#global varibles
+CRAWLER_CONFIG_FILE = './all_crawlers.json'
+
+TEST_GLOBAL = 'GLOBAL'
+
+def setGlobal(value):
+	global TEST_GLOBAL
+	TEST_GLOBAL = value
+	print TEST_GLOBAL
+
+def getGlobal():
+	return TEST_GLOBAL
+
 def  formulateUrl(productName, productModel, id=3975, webflag=2):
 	baseUrl = 'http://price.oilchem.net/imPrice/getPrice.lz?'
 
@@ -123,14 +136,28 @@ def main(configFilePath):
 	print('------------ End -------------')
 	return 0
 
+def getDataApiUrl(crawler_name):
+	with open(CRAWLER_CONFIG_FILE, 'r') as configFile:
+		config = configFile.read()
+		print (config)
+		crawler_configs = json.loads(config)
+
+	for crawler_config in crawler_configs:
+		if (crawler_config['crawler_name'] == crawler_name):
+			return crawler_config['data_api_url']
+
+	return None
+
 #same as main, but get the cookie from parameter
-def downloadData(cookieValue, outputpath):
+def downloadData(crawler_name, cookieValue, outputpath):
 	print('-------------- Start crawling -----------------------')
 	# os.system('pwd')
 	startTime = time.time()
 	pageSize = 200 #define the page size
 
-	reqUrl = formulateUrl('LLDPE', '丁烯基', 3975, 2)
+	reqUrl = getDataApiUrl(crawler_name)
+
+	# reqUrl = formulateUrl('LLDPE', '丁烯基', 3975, 2)
 
 	headers = setCookieInHeader(cookieValue)
 

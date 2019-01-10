@@ -25,13 +25,25 @@ class  PlasOilchemSpider(SpiderBase):
 	userPassword = 'ax1010zq'
 	userName = 'axzq1010'
 
-	name = 'plas_spider'
+	name = 'lldpe_usd'
 	start_urls = [
 		'http://news.oilchem.net/login.shtml'
 	]
-	
+
+	# price_name = 'LLDPE_east_china_USD' #LL华东价格usd
+	price_name = 'LDPE_USD'
+
+	def parse(self, response ):
+		print (response.url)
+		# cookieAfterLogin = self.login_by_formsubmit(response)
+		cookieAfterLogin = self.login_by_selenium(response)
+
+		#real crawler start here
+		print('Start crawl data!')
+		plas_crawler.downloadData(crawler_name=self.price_name, cookieAfterLogin, self.getOutputPath())
+
 	#login by simulating form submit as the webpage does.
-	def parse_by_formsubmit(self, response):
+	def login_by_formsubmit(self, response):
 		print(response.url)
 		print('----------Try to login-------------')
 		loginMachine = oilchem_login.AutoLogin(self.getWorkingDir())
@@ -39,16 +51,10 @@ class  PlasOilchemSpider(SpiderBase):
 		loginMachine.setAccount(self.userName, self.userPassword)
 		cookieAfterLogin = loginMachine.formlogin(response)
 
-		#real crawler start here
-		# print('Start crawl data!')
-		plas_crawler.downloadData(cookieAfterLogin)
+		return cookieAfterLogin
 
-	def parse(self, response ):
-		print (response.url)
-		# self.parse_by_formsubmit(response)
-		self.parse_by_selenium(response)
-
-	def parse_by_selenium(self, response):
+	#login by selenium
+	def login_by_selenium(self, response):
 		print('----------Try to login-------------')
 		loginMachine = oilchem_login.SeleniumLogin(self.getWorkingDir())
 
@@ -56,9 +62,8 @@ class  PlasOilchemSpider(SpiderBase):
 		cookieAfterLogin = loginMachine.selelogin(response)
 
 		print (cookieAfterLogin)
-		#real crawler start here
-		print('Start crawl data!')
-		plas_crawler.downloadData(cookieAfterLogin, self.getOutputPath())
+		return cookieAfterLogin
+		
 		
 	def getWorkingDir(self):
 		if os.path.exists('./work_dir'):
