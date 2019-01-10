@@ -139,7 +139,7 @@ def main(configFilePath):
 def getDataApiUrl(crawler_name):
 	with open(CRAWLER_CONFIG_FILE, 'r') as configFile:
 		config = configFile.read()
-		print (config)
+		# print (config)
 		crawler_configs = json.loads(config)
 
 	for crawler_config in crawler_configs:
@@ -149,15 +149,15 @@ def getDataApiUrl(crawler_name):
 	return None
 
 #same as main, but get the cookie from parameter
-def downloadData(crawler_name, cookieValue, outputpath):
+def downloadData(crawlerName, cookieValue, outputpath, configFile):
 	print('-------------- Start crawling -----------------------')
 	# os.system('pwd')
 	startTime = time.time()
 	pageSize = 200 #define the page size
 
-	reqUrl = getDataApiUrl(crawler_name)
-
-	# reqUrl = formulateUrl('LLDPE', '丁烯基', 3975, 2)
+	global CRAWLER_CONFIG_FILE
+	CRAWLER_CONFIG_FILE = configFile
+	reqUrl = getDataApiUrl(crawlerName)
 
 	headers = setCookieInHeader(cookieValue)
 
@@ -169,14 +169,14 @@ def downloadData(crawler_name, cookieValue, outputpath):
 	print('')
 
 	timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-	outputFileName = outputpath + '/plas_out_' + timestamp + '.csv'
+	outputFileName = outputpath + '/' + crawlerName +'_out_' + timestamp + '.csv'
 	print('==== output to:')
 	print(outputFileName)
 	outputFile = open(outputFileName, 'w+')
 
 	for i in range(1,maxPage):
 		if (i == 1):
-			csvHead = u'ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,备注\n'
+			csvHead = u'ID,报价日期,产品名称,规格型号,地区,价格类型,低端价,高端价,中间价,单位,涨跌幅,人民币价,--,备注\n'
 			# print(csvHead)
 			outputFile.write(csvHead.encode('utf-8'))
 			
@@ -185,8 +185,9 @@ def downloadData(crawler_name, cookieValue, outputpath):
 			priceItem = jsonData['rows'][j]
 			id = priceItem['id']
 			cell = priceItem['cell']
-			line = id + ',' + ','.join(cell) + '\n'
-			# line = line.decode('ascii')
+			# line = id + ',' + ','.join(cell) + '\n'
+			line = ','.join(cell) + '\n'
+			
 			line = line.encode('utf-8')
 			# print(line)
 			outputFile.write(line)

@@ -30,8 +30,8 @@ class  PlasOilchemSpider(SpiderBase):
 		'http://news.oilchem.net/login.shtml'
 	]
 
-	# price_name = 'LLDPE_east_china_USD' #LL华东价格usd
-	price_name = 'LDPE_USD'
+	price_name = 'LLDPE_east_china_USD' 		#LL华东价格usd
+	# price_name = 'LDPE_USD'						#LD华东价格usd
 
 	def parse(self, response ):
 		print (response.url)
@@ -40,7 +40,7 @@ class  PlasOilchemSpider(SpiderBase):
 
 		#real crawler start here
 		print('Start crawl data!')
-		plas_crawler.downloadData(crawler_name=self.price_name, cookieAfterLogin, self.getOutputPath())
+		plas_crawler.downloadData(self.price_name, cookieAfterLogin, self.getOutputPath(), self.getCrawlerConfigFile())
 
 	#login by simulating form submit as the webpage does.
 	def login_by_formsubmit(self, response):
@@ -78,6 +78,15 @@ class  PlasOilchemSpider(SpiderBase):
 		else:
 			os.mkdir('output')
 			return os.getcwd() + '/output'
+
+	def getCrawlerConfigFile(self):
+		if os.path.exists('./all_crawlers.json'):
+			return os.path.abspath('./all_crawlers.json')
+		elif os.path.exists('./plastic_oilchem/all_crawlers.json'):
+			return os.path.abspath('./plastic_oilchem/all_crawlers.json')
+		else:
+			raise Exception('ERROR: Can not find all_crawlers.json!')
+
 
 	#######################################################################
 	# The following code it not used now, just work as a backup solution #

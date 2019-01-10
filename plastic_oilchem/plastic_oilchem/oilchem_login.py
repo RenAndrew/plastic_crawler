@@ -154,8 +154,8 @@ class AutoLogin:
 		cookie += 'lz_usermember=0%2C2; auto=0; refcheck=ok; refpay=0; refsite=http%3A%2F%2Fnews.oilchem.net%2Flogin.shtml; '
 		cookie += 'Hm_lvt_47f485baba18aaaa71d17def87b5f7ec=1546486194; Hm_lpvt_47f485baba18aaaa71d17def87b5f7ec=1546486194'
 		
-		print('-' * 40)
-		print (cookie)
+		# print('-' * 40)
+		# print (cookie)
 
 		return cookie
 
@@ -241,7 +241,7 @@ class SeleniumLogin(AutoLogin):
 
 				print ('-'*30)
 				print ('Login successfully!')
-				print (loginedCookie)
+				# print (loginedCookie)
 				print ('-'*30)
 				browser.close()
 				return loginedCookie
