@@ -18,6 +18,7 @@ from .. import plas_crawler
 from .. import decode
 from .. import oilchem_login
 from .. import SpiderBase
+from .. import url_crawler
 
 class  PlasOilchemSpider(SpiderBase):
 	"""爬取隆众价格网上塑料数据，直接调用数据API获取数据，自动登录并利用登录后的cookie获取权限"""
