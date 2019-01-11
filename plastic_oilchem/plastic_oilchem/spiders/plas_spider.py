@@ -41,7 +41,14 @@ class  PlasOilchemSpider(SpiderBase):
 
 		#real crawler start here
 		print('Start crawl data!')
-		plas_crawler.downloadData(self.price_name, cookieAfterLogin, self.getOutputPath(), self.getCrawlerConfigFile())
+		crawlerConfig = url_crawler.UrlCrawlerConfig(cookieAfterLogin, self.price_name, 
+														self.getCrawlerConfigFile(), self.getOutputPath(),
+														pagesize=300)
+
+		crawler = url_crawler.UrlCrawler(crawlerConfig)
+		crawler.downloadData()
+
+		# plas_crawler.downloadData(self.price_name, cookieAfterLogin, self.getOutputPath(), self.getCrawlerConfigFile())
 
 	#login by simulating form submit as the webpage does.
 	def login_by_formsubmit(self, response):

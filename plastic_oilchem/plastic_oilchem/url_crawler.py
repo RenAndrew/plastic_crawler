@@ -18,6 +18,21 @@ class UrlCrawlerConfig:
 		self.outputpath = outputpath
 		self.pageSize = pagesize
 
+		self.configDetails()
+
+	def setCookieInHeader(self, cookie):
+		headers = {
+			'Accept':'application/json, text/plain, */*',
+		    'Accept-Encoding':'gzip, deflate',
+		    'Accept-Language':'zh-CN,zh;q=0.8',
+		    'Connection':'keep-alive',
+		    'Content-Type':'application/x-www-form-urlencoded',
+		    'User-Agent':'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.23 Mobile Safari/537.36',
+		    'cookie' : cookie
+		}
+
+		return headers
+
 	def configDetails(self):
 		self.apiHeaders = self.setCookieInHeader(self.cookie)
 
@@ -28,7 +43,7 @@ class UrlCrawlerConfig:
 			crawler_configs = json.loads(config)
 
 		for crawler_config in crawler_configs:
-			if (crawler_config['crawler_name'] == downloadConfig.crawlerName):
+			if (crawler_config['crawler_name'] == self.crawlerName):
 				self.config = crawler_config
 
 		if self.config is None:
@@ -52,20 +67,6 @@ class UrlCrawler:
 		self.config = crawlerConfig
 
 		print(self)
-		
-
-	def setCookieInHeader(self, cookie):
-		headers = {
-			'Accept':'application/json, text/plain, */*',
-		    'Accept-Encoding':'gzip, deflate',
-		    'Accept-Language':'zh-CN,zh;q=0.8',
-		    'Connection':'keep-alive',
-		    'Content-Type':'application/x-www-form-urlencoded',
-		    'User-Agent':'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.23 Mobile Safari/537.36',
-		    'cookie' : cookie
-		}
-
-		return headers
 
 	def postParameter(self, page, pageSize=40):
 		postdata = {
@@ -102,20 +103,22 @@ class UrlCrawler:
 		print('-------------- Start crawling -----------------------')
 		
 		startTime = time.time()
-		outputpath = self.outputpath
-		pageSize = self.pageSize
-		reqUrl = self.dataUrl
-		headers = self.setCookieInHeader(self.cookie)
+		config = self.config
+		outputpath = config.outputpath
+		pageSize = config.pageSize
+		reqUrl = config.dataUrl
+		headers = config.apiHeaders
+		csvHead = config.csvHead
 
-		jsonData = getDataPage(reqUrl, headers, pageSize, 1)  # get the first page of data
+		jsonData = self.getDataPage(reqUrl, headers, pageSize, 1)  # get the first page of data
 
 		totalItemCount = jsonData['total']
-		maxPage = (totalItemCount + pageSize - 1) / pageSize  #整数除法向上取整
+		maxPage = (totalItemCount + pageSize - 1) / pageSize  	#整数除法向上取整
 		print('====> Total item count: ' + str(totalItemCount) + ', number of pages: ' + str(maxPage))
 		print('')
 
 		timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-		outputFileName = outputpath + '/' + crawlerName +'_out_' + timestamp + '.csv'
+		outputFileName = outputpath + '/' + config.crawlerName +'_out_' + timestamp + '.csv'
 		print('==== output to:')
 		print(outputFileName)
 		outputFile = open(outputFileName, 'w+')
@@ -123,7 +126,7 @@ class UrlCrawler:
 		for i in range(1,maxPage):
 			if (i == 1):
 				outputFile.write(csvHead.encode('utf-8'))
-			jsonData = getDataPage(reqUrl, headers, pageSize, i)
+			jsonData = self.getDataPage(reqUrl, headers, pageSize, i)
 			for j in range(0, len(jsonData['rows']) ):
 				priceItem = jsonData['rows'][j]
 				id = priceItem['id']
