@@ -12,16 +12,6 @@ import demjson
 #global varibles
 CRAWLER_CONFIG_FILE = './all_crawlers.json'
 
-TEST_GLOBAL = 'GLOBAL'
-
-def setGlobal(value):
-	global TEST_GLOBAL
-	TEST_GLOBAL = value
-	print TEST_GLOBAL
-
-def getGlobal():
-	return TEST_GLOBAL
-
 def  formulateUrl(productName, productModel, id=3975, webflag=2):
 	baseUrl = 'http://price.oilchem.net/imPrice/getPrice.lz?'
 
