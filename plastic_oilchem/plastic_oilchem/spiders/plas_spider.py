@@ -26,13 +26,12 @@ class  PlasOilchemSpider(SpiderBase):
 	userPassword = 'ax1010zq'
 	userName = 'axzq1010'
 
-	name = 'lldpe_usd'
+	name = 'lldpe_test'
 	start_urls = [
 		'http://news.oilchem.net/login.shtml'
 	]
 
-	price_name = 'LLDPE_east_china_USD' 		#LL华东价格usd
-	# price_name = 'LDPE_USD'						#LD华东价格usd
+	price_name = 'LLDPE_TEST' 		#测试
 
 	def parse(self, response ):
 		print (response.url)
