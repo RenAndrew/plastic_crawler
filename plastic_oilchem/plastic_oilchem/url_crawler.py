@@ -168,11 +168,18 @@ class UrlCrawler:
 		print('====> Total item count: ' + str(totalItemCount) + ', number of pages: ' + str(maxPage))
 		print('')
 
-		# timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
-		# outputFileName = outputpath + '/' + config.crawlerName +'_out_' + timestamp + '.csv'
-		# print('==== output to:')
-		# print(outputFileName)
-		# outputFile = open(outputFileName, 'w+')
+		timestamp = time.strftime("%Y%m%d%H%M%S", time.localtime())
+		outputFileName = outputpath + '/' + config.crawlerName +'_out_' + timestamp + '.csv'
+		print('==== output to:')
+		print(outputFileName)
+		outputFile = open(outputFileName, 'w+')
+
+		outputFile.write(csvHead.encode('utf-8'))
+		self.dumpPage(jsonData)
+
+		for i in range(2,maxPage):
+			jsonData = self.getDataPage(reqUrl, headers, pageSize, i)
+			self.dumpPage(outputFile, jsonData)
 
 		# for i in range(1,maxPage):
 		# 	if (i == 1):
@@ -189,13 +196,37 @@ class UrlCrawler:
 		# 		# print(line)
 		# 		outputFile.write(line)
 
-		# outputFile.close()
+		outputFile.close()
 
 		endTime = time.time()
 		print('Compelete the job in ' + str(endTime - startTime) + ' seconds.')
 		print('------------ End -------------')
 		return 0
 
+	def dumpPage(self, outputFile, jsonData):
+		rows = jsonData['pageInfo']['list']
+
+		for item in rows:
+			pubDate = item['indexDate']
+			productName = item['varietiesName']
+			spec = item['specificationsName']
+			standard = item['standard']
+			region = item['regionName']
+			market = item['internalMarketName']
+			campany = item['memberAbbreviation']
+			priceLow = item['lprice']
+			priceHigh = item['gprice']
+			priceMarket = item['indexValue']
+			unit = item['unitValuationName']
+			increaseAmount = item['riseOrFallSum']
+			increaseRate = item['riseOrFallRate']
+			remark = item['remark']
+
+			line = pubDate + productName + spec + standard + region + market + campany + priceLow + priceHigh + priceMarket + unit + increaseAmount + increaseRate + remark
+
+			print line
+			outputFile.write(line)
+			break;
 	# def downloadData(crawlerName, cookieValue, outputpath, configFile):
 	# 	print('-------------- Start crawling -----------------------')
 	# 	# os.system('pwd')
@@ -247,6 +278,7 @@ class UrlCrawler:
 	# 	return 0
 
 if __name__ == "__main__":
+	# replace the cookie, it is expired
 	cookieAfterLogin = "auto=0; Hm_lvt_47f485baba18aaaa71d17def87b5f7ec=1546400047,1548124913; Hm_lpvt_47f485baba18aaaa71d17def87b5f7ec=1548124913; refcheck=ok; refpay=0; refsite=; _remberId=true; _member_user_tonken_=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZWMiOiIkMmEkMTAkV0k5MlFWNWl2a3pNMEZPOW00MnVmLkFSWS96VmxYaFVybUU0YkQwZGZlLm5ENkVXQTJQZlMiLCJuaWNrTmFtZSI6IiIsInBpYyI6IiIsImV4cCI6MTU1MTkyNTE3OSwidXNlcklkIjoxNjQ2MzcsImlhdCI6MTU1MTgzODc3OSwianRpIjoiYTc2ODMyMzQtNTMzNy00MjBmLTlkMjctYzJjNGNlNWY1MjZjIiwidXNlcm5hbWUiOiJheHpxMTAxMCJ9.zArBXbmks5Fa9J0MyUkgKfIX98CntZrTYuNAip4pfuk"
 	print('Start crawl data!')
 
