@@ -236,6 +236,7 @@ class UrlCrawler:
 			line += ',' + increaseAmount
 			line += ',' + increaseRate
 			line += ',' + remark
+			line += '\n'
 
 			print line
 			outputFile.write(line.encode('utf-8'))
