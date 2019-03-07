@@ -144,7 +144,7 @@ class UrlCrawler:
 		response = urllib2.urlopen(req)
 		retdata = response.read()    #返回的数据是经过压缩的
 
-		return retdata
+		return demjson.decode(retdata)
 
 	def getDataApiUrl(self):
 		return self.config.dataUrl
@@ -175,7 +175,7 @@ class UrlCrawler:
 		outputFile = open(outputFileName, 'w+')
 
 		outputFile.write(csvHead.encode('utf-8'))
-		self.dumpPage(jsonData)
+		self.dumpPage(outputFile, jsonData)
 
 		for i in range(2,maxPage):
 			jsonData = self.getDataPage(reqUrl, headers, pageSize, i)
@@ -222,11 +222,24 @@ class UrlCrawler:
 			increaseRate = item['riseOrFallRate']
 			remark = item['remark']
 
-			line = pubDate + productName + spec + standard + region + market + campany + priceLow + priceHigh + priceMarket + unit + increaseAmount + increaseRate + remark
+			line = pubDate
+			line += ',' + productName
+			line += ',' + spec
+			line += ',' + standard
+			line += ',' + region
+			line += ',' + market
+			line += ',' + campany
+			line += ',' + priceLow
+			line += ',' + priceHigh
+			line += ',' + priceMarket
+			line += ',' + unit
+			line += ',' + increaseAmount
+			line += ',' + increaseRate
+			line += ',' + remark
 
 			print line
-			outputFile.write(line)
-			break;
+			outputFile.write(line.encode('utf-8'))
+
 	# def downloadData(crawlerName, cookieValue, outputpath, configFile):
 	# 	print('-------------- Start crawling -----------------------')
 	# 	# os.system('pwd')
@@ -279,7 +292,7 @@ class UrlCrawler:
 
 if __name__ == "__main__":
 	# replace the cookie, it is expired
-	cookieAfterLogin = "auto=0; Hm_lvt_47f485baba18aaaa71d17def87b5f7ec=1546400047,1548124913; Hm_lpvt_47f485baba18aaaa71d17def87b5f7ec=1548124913; refcheck=ok; refpay=0; refsite=; _remberId=true; _member_user_tonken_=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZWMiOiIkMmEkMTAkV0k5MlFWNWl2a3pNMEZPOW00MnVmLkFSWS96VmxYaFVybUU0YkQwZGZlLm5ENkVXQTJQZlMiLCJuaWNrTmFtZSI6IiIsInBpYyI6IiIsImV4cCI6MTU1MTkyNTE3OSwidXNlcklkIjoxNjQ2MzcsImlhdCI6MTU1MTgzODc3OSwianRpIjoiYTc2ODMyMzQtNTMzNy00MjBmLTlkMjctYzJjNGNlNWY1MjZjIiwidXNlcm5hbWUiOiJheHpxMTAxMCJ9.zArBXbmks5Fa9J0MyUkgKfIX98CntZrTYuNAip4pfuk"
+	cookieAfterLogin = "_remberId=true; auto=0; Hm_lvt_47f485baba18aaaa71d17def87b5f7ec=1546400047,1548124913; Hm_lpvt_47f485baba18aaaa71d17def87b5f7ec=1548124913; _remberId=true; refcheck=ok; refpay=0; refsite=https%3A%2F%2Fdc.oilchem.net%2FpriceDomestic%2Flist.htm%3FspecificationsId%3D%26regionId%3D3%26memberId%3D%26standard%3D%26productState%3D%26varietiesId%3D316%26varietiesName%3DLLDPE%26templateType%3D6%26flagAndTemplate%3D1-4%253B3-2%253B2-6%26channelId%3D%26isShow%3D1%26oneName%3D%26twoName%3D; _member_user_tonken_=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzZWMiOiIkMmEkMTAkekhjeHVlWUM3bW5sYTVBOC41UFNjdUthRHQ4Q1VnSEo3LkJ4dlNUQ0VGY1IuWFFIZFdvUkciLCJuaWNrTmFtZSI6IiIsInBpYyI6IiIsImV4cCI6MTU1MjAxNDA2OSwidXNlcklkIjoxNjQ2MzcsImlhdCI6MTU1MTkyNzY2OSwianRpIjoiYTE1NThkZDUtMjY3NS00ZjcwLTgzMDktZDU3ODUyOGQwYzkzIiwidXNlcm5hbWUiOiJheHpxMTAxMCJ9.ectu7TCDMZ4PeivcCizPuBvNsjRiWFWi-VcvLdwlaWo"
 	print('Start crawl data!')
 
 	crawlerConfig = UrlCrawlerConfig(cookieAfterLogin, "LLDPE_TEST", 
